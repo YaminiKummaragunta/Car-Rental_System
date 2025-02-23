@@ -1,38 +1,40 @@
-// require('dotenv').config();
-
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
-const cors = require('cors');
-// const bodyParser = require('body-parser');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
 
 const userRoutes = require("./routes/userRoutes");
 const carRoutes = require("./routes/carRoutes");
 const carBookingRoutes = require("./routes/carBookingRoutes");
 
-const connect = async () => {
+const app = express();
+
+// Middleware
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(express.json());
+
+// Connect to MongoDB
+const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/Car-rental-system");
-    console.log("Connected to Database of MongoDB");
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("Connected to MongoDB");
   } catch (err) {
-    console.log(err.message);
+    console.error("MongoDB connection error:", err);
   }
 };
 
-app.use(cors());
-app.use(express.json());
-// app.use(bodyParser.json());
+connectDB();
 
 app.get("/", (req, res) => {
-  res.send("server is working....");
+  res.send("Server is working...");
 });
 
+// Routes
 app.use("/users", userRoutes);
 app.use("/cars", carRoutes);
 app.use("/bookings", carBookingRoutes);
 
-const PORT = 80;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log("Server is listening on port", 80);
+  console.log(`Server running on port ${PORT}`);
 });
-connect();
